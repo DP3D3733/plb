@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLB - Home</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+    <script src="js/index.js" defer></script>
+    <base target="_blank">
+</head>
+
+<body>
+    <div>
+        <div class="linhaProgresso">
+            <h1 id="saudacaoLbl">Olá Fulano</h1>
+            <button id="sairButton" onclick="logout()">Sair</button>
+        </div>
+        <h3>Seu progresso de leitura bíblica</h3>
+
+        <div id="progressoDiv" class="bloco">
+            <span class="titulo">Progresso Geral</span>
+            <div id="qtdProgresso" class="subBloco">
+                <div class="linhaProgresso">
+                    <span>0 de 1189 capítulos lidos</span>
+                    <span id="percentProgresso">0,0%</span>
+                </div>
+
+                <div class="progress">
+                    <div class="progress-bar" style="width: 40%"></div>
+                </div>
+            </div>
+            <div id="hojeProgresso" class="subBloco">
+                <span>📅 Hoje</span>
+                <h2>0</h2>
+                <h3>capítulos lidos</h3>
+            </div>
+            <div id="totalProgresso" class="subBloco">
+                <span>✓ Total Lido</span>
+                <h2>0</h2>
+                <h3>capítulos</h3>
+            </div>
+            <div id="restantesProgresso" class="subBloco">
+                <span>📖 Restantes</span>
+                <h2>0</h2>
+                <h3>capítulos</h3>
+            </div>
+            <div id="recordeConstancia" class="subBloco"
+                onclick="document.getElementById('listaConstancia').classList.toggle('fechada');">
+                <span>⚪ Constância</span>
+                <h3>Não Iniciada</h3>
+                <h2>0</h2>
+                <h3>dias firmes na leitura</h3>
+                <div class="acao">›</div>
+                <ul id="listaConstancia" class="fechada">
+                    <li>Seu registro de dias seguidos de leitura. Ele zera se você perder um dia.</li>
+                    <li>
+                        <span class="emoji">⚪</span>
+                        <div>
+                            <strong>Não Iniciado - 0 dia seguido</strong>
+                            <small>A jornada ainda não começou.</small>
+                        </div>
+                    </li>
+
+                    <li>
+                        <span class="emoji">🔥</span>
+                        <div>
+                            <strong>Chamado - 1 dia seguido</strong>
+                            <small>Despertado para a prática diária. (Mt 22:14)</small>
+                        </div>
+                    </li>
+
+                    <li>
+                        <span class="emoji">🌿</span>
+                        <div>
+                            <strong>Discípulo - 7 dias seguidos</strong>
+                            <small>Aprendendo com constância e criando raízes. (Lc 9:23)</small>
+                        </div>
+                    </li>
+
+                    <li>
+                        <span class="emoji">🛡️</span>
+                        <div>
+                            <strong>Servo Fiel - 21 dias seguidos</strong>
+                            <small>Constância que sustenta a obra. (Mt 25:21)</small>
+                        </div>
+                    </li>
+
+                    <li>
+                        <span class="emoji">⚒️</span>
+                        <div>
+                            <strong>Obreiro - 50 dias seguidos</strong>
+                            <small>Prática constante e responsabilidade. (2Tm 2:15)</small>
+                        </div>
+                    </li>
+
+                    <li>
+                        <span class="emoji">🏗️</span>
+                        <div>
+                            <strong>Cooperador - 90 dias seguidos</strong>
+                            <small>Edificando junto com outros. (1Co 3:9)</small>
+                        </div>
+                    </li>
+
+                    <li>
+                        <span class="emoji">📜</span>
+                        <div>
+                            <strong>Aprovado - 120 dias seguidos</strong>
+                            <small>Fidelidade comprovada pela perseverança. (Rm 16:10)</small>
+                        </div>
+                    </li>
+
+                    <li>
+                        <span class="emoji">🏅</span>
+                        <div>
+                            <strong>Homem/Mulher de Fé - 150 dias seguidos</strong>
+                            <small>Constância que se tornou testemunho. (Hb 11:6)</small>
+                        </div>
+                    </li>
+
+                    <li>
+                        <span class="emoji">👑</span>
+                        <div>
+                            <strong>Mordomo Fiel - 180 dias seguidos</strong>
+                            <small>Responsabilidade e confiança. (1Co 4:2)</small>
+                        </div>
+                    </li>
+
+                    <li>
+                        <span class="emoji">🏛️</span>
+                        <div>
+                            <strong>Coluna na Obra - 200 dias seguidos</strong>
+                            <small>Quem sustenta e fortalece a missão. (Gl 2:9)</small>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="metaDiv" class="bloco">
+            <span class="titulo">Meta de hoje</span>
+            <div id="metaLista" class="subBloco">
+                <ul>
+                    <li>Cap 1</li>
+                    <li>Cap 2</li>
+                    <li>Cap 3</li>
+                </ul>
+            </div>
+        </div>
+        <div id="planoDetalhadoDiv" class="bloco">
+            <span class="titulo">Plano de Leitura Detalhado</span>
+            <div id="nLidosDetalhado" class="subBloco">
+                <details>
+                    <summary>
+                        A Ler
+                    </summary>
+                    <ul id="aLerLista">
+                        <li>Cap 1</li>
+                        <li>Cap 2</li>
+                        <li>Cap 3</li>
+                    </ul>
+                </details>
+            </div>
+            <div id="LidosDetalhado" class="subBloco">
+                <details>
+                    <summary>
+                        Lidos
+                    </summary>
+                    <ul id="lidosLista">
+                        <li>Cap 1</li>
+                        <li>Cap 2</li>
+                        <li>Cap 3</li>
+                    </ul>
+                </details>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
