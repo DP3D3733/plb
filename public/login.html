@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <script src="js/login.js" defer></script>
 
   <link rel="stylesheet" href="css/login.css">
@@ -22,9 +23,18 @@
     <span class="subtituloApp">Plano de Leitura Bíblica</span>
 
     <input type="text" id="login" placeholder="Usuário" value="calebe">
-    <input type="password" id="senha" placeholder="Senha" value="12345">
+    <input type="password" id="senha" placeholder="Senha" value="DP3D3733">
 
     <button onclick="login()">Entrar</button>
+  </div>
+  <div id="primeiroAcessoDiv" class="bloco">
+    <span class="tituloApp">PLB</span>
+    <span class="subtituloApp">Primeiro Acesso</span>
+    <input type="text" id="senhaAtual" placeholder="Senha atual...">
+    <input type="password" id="novaSenha" placeholder="Nova senha...">
+    <input type="password" id="repetirNovaSenha" placeholder="Repetir a nova senha...">
+
+    <button onclick="atualizarSenha()">Atualizar Senha</button>
   </div>
 </body>
 

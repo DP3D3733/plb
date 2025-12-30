@@ -117,7 +117,7 @@ async function verificarLogin() {
 
         //insere os lidos na lista detalhada
         if (ordem) {
-            const dados = calculaMeta(parseInt(usuarioLogado.qtd_lidos));
+            const dados = calculaMeta(parseInt(usuarioLogado.qtd_lidos || 0));
             let ul = '';
             dados.lidos.forEach((capitulo) => {
                 let capituloNome = '';
@@ -148,7 +148,7 @@ async function verificarLogin() {
                     const marcado = usuarioLogado.lidos_hoje[usuarioLogado.lidos_hoje.length - 1]?.includes(capitulo.split('-++-')[0]) ? '<button onclick="marcarLido(this)" class="marcarLidoButton desmarcar">↺</button>' : '';
                     ul += `<li qtdVersiculos=${capitulo.split('-++-')[1]}><a href="https://www.bibliaonline.com.br/nvi/${capituloNome}/${capituloNumero}">${capitulo.split('-++-')[0]}</a><span class="lidoSinal">✔</span> ${marcado}</li>`;
                 } else {
-                    ul += `<li qtdVersiculos=${capitulo.split('-++-')[1]}><a href="https://www.bibliaonline.com.br/nvi/${capituloNome}/${capituloNumero}">${capitulo.split('-++-')[0]}</a>${capitulo.split('-++-')[0]}</a><span class="lidoSinal">✔</span></li>`;
+                    ul += `<li qtdVersiculos=${capitulo.split('-++-')[1]}><a href="https://www.bibliaonline.com.br/nvi/${capituloNome}/${capituloNumero}">${capitulo.split('-++-')[0]}</a><span class="lidoSinal">✔</span></li>`;
                 }
 
             });
@@ -178,16 +178,18 @@ async function verificarLogin() {
                     Array.from(document.querySelectorAll(`#metaLista li, #aLerLista li`)).find((li) => li.innerHTML.includes(capitulo))?.classList.add('lido');
                 });
             }
-
-            if (!document.querySelector('#metaLista li:has(button.desmarcar)') && !document.querySelector('#aLerLista li:has(button.desmarcar)')) {
-                document.querySelector('#metaLista li').innerHTML += '<button onclick="marcarLido(this)" class="marcarLidoButton">✔</button>';
-            } else if (document.querySelector('#metaLista li:has(button.desmarcar)') && document.querySelector('#metaLista li:has(button.desmarcar)').nextElementSibling) {
-                document.querySelector('#metaLista li:has(button.desmarcar)').nextElementSibling.innerHTML += '<button onclick="marcarLido(this)" class="marcarLidoButton">✔</button>';
-            } else if (!document.querySelector('#aLerLista li:has(button.desmarcar)')) {
-                document.querySelector('#aLerLista li').innerHTML += '<button onclick="marcarLido(this)" class="marcarLidoButton">✔</button>';
-            } else {
-                document.querySelector('#aLerLista li:has(button.desmarcar)').nextElementSibling.innerHTML += '<button onclick="marcarLido(this)" class="marcarLidoButton">✔</button>';
+            if (document.querySelector('#metaLista li')) {
+                if (!document.querySelector('#metaLista li:has(button.desmarcar)') && !document.querySelector('#aLerLista li:has(button.desmarcar)')) {
+                    document.querySelector('#metaLista li').innerHTML += '<button onclick="marcarLido(this)" class="marcarLidoButton">✔</button>';
+                } else if (document.querySelector('#metaLista li:has(button.desmarcar)') && document.querySelector('#metaLista li:has(button.desmarcar)').nextElementSibling) {
+                    document.querySelector('#metaLista li:has(button.desmarcar)').nextElementSibling.innerHTML += '<button onclick="marcarLido(this)" class="marcarLidoButton">✔</button>';
+                } else if (!document.querySelector('#aLerLista li:has(button.desmarcar)')) {
+                    document.querySelector('#aLerLista li').innerHTML += '<button onclick="marcarLido(this)" class="marcarLidoButton">✔</button>';
+                } else {
+                    document.querySelector('#aLerLista li:has(button.desmarcar)').nextElementSibling.innerHTML += '<button onclick="marcarLido(this)" class="marcarLidoButton">✔</button>';
+                }
             }
+
 
 
             if (usuarioLogado.historico_lidos) {
@@ -214,7 +216,7 @@ function atualizaPaineis(dados) {
 
 //atualiza o quantitativo permanente
 function atualizaQtdPerm(usuarioLogado) {
-    if (!usuarioLogado.atualizadoEm) return;
+    if (!usuarioLogado.atualizadoEm || usuarioLogado.atualizadoEm == '-') return;
 
     const atualizadoEm = (new Date(usuarioLogado.atualizadoEm)).getDate();
     const hoje = (new Date()).getDate();
@@ -226,10 +228,9 @@ function atualizaQtdPerm(usuarioLogado) {
         });
         usuarioLogado.historico_lidos = historicoLidos;
         usuarioLogado.qtd_lidos = (usuarioLogado.qtd_lidos || 0) + (usuarioLogado.qtdLidosHoje || 0);
-        usuarioLogado.qtd_lidos = usuarioLogado.qtdLidosHoje || 0;
-        delete usuarioLogado.qtdLidosHoje;
-        delete usuarioLogado.lidos_hoje;
-        delete usuarioLogado.atualizadoEm;
+        usuarioLogado.qtdLidosHoje = 0;
+        usuarioLogado.lidos_hoje = [];
+        usuarioLogado.atualizadoEm = '-';
         sessionStorage.setItem('login', JSON.stringify(usuarioLogado));
     }
     enviarLidos();
@@ -363,7 +364,7 @@ function separarLivroCapitulo(texto) {
 function marcarLido(button) {
     const lido = button.innerText == '✔' ? true : false; //se false é pra Desmarcar
     const qtd = parseInt(button.parentNode.getAttribute('qtdversiculos'));
-    const capitulo = button.parentNode.innerHTML.split('<butto')[0].trim();
+    const capitulo = button.parentNode.querySelector('a').innerText.trim();
     const usuarioLogado = JSON.parse(getLogin());
     const lidos_hoje = usuarioLogado.lidos_hoje || [];
     let qtdLidosHoje = usuarioLogado.qtdLidosHoje || 0;
@@ -424,7 +425,7 @@ async function enviarLidos() {
         .collection('usuarios')
         .doc(usuarioLogado.nome.toLowerCase());
 
-    await ref.set(usuarioLogado);
+    await ref.set(usuarioLogado, { merge: true });
 }
 
 //atualiza o histórico de lidos
@@ -440,38 +441,44 @@ function atualizaHist(historico_lidos) {
         const capitulo = li.querySelector('a').innerHTML;
         for (const registro of historico_lidos) {
             if (registro.capitulos.includes(capitulo)) {
-                const data = new Date(registro.data).toISOString().split('T')[0];
+                const data = new Date((new Date(registro.data)).setHours(0,0,0,0));
                 if (!datas.includes(data)) {
                     datas.push(data);
                 }
-                li.innerHTML += `<span class="data-lido">${data.split('-')[2]}/${data.split('-')[1]}/${data.split('-')[0]}</span>`;
+                li.innerHTML += `<span class="data-lido">${data.getDate()}/${data.getMonth()}/${data.getFullYear()}</span>`;
                 break;
             }
         }
     });
 
     //atualiza o recorde de constância
-    const datasObj = datas.map((dataStr) => new Date(dataStr)); //converte as datas para objetos Date
-    datasObj.sort((a, b) => a - b); //ordena as datas
-    let recorde = 0;
+    datas.sort((a, b) => b - a); //ordena as datas
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const ontem = new Date(hoje);
+    ontem.setDate(hoje.getDate() - 1);
+
     let constanciaAtual = 0;
-    for (let i = 0; i < datasObj.length; i++) {
-        if (i === 0) {
-            constanciaAtual = 1;
-        } else {
-            const diffTime = Math.abs(datasObj[i] - datasObj[i - 1]);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            if (diffDays === 1) {
-                constanciaAtual++;
-            }
-            else {
-                if (constanciaAtual > recorde) {
-                    recorde = constanciaAtual;
-                }
+
+    if (datas[0].getTime() == ontem.getTime()) {
+        for (let i = 0; i < datas.length; i++) {
+            if (i === 0) {
                 constanciaAtual = 1;
+            } else {
+                
+                const diffTime = Math.abs(datas[i] - datas[i - 1]);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays === 1) {
+                    constanciaAtual++;
+                } else {
+                    i = datas.length;
+                }
             }
         }
     }
+
 
     const badges = ['⚪', '🔥', '🌿', '🛡️', '⚒️', '🏗️', '📜', '🏅', '👑', '🏛️'];
     const titulosMasc = ['Não Iniciado', 'Chamado - Mt 22:14', 'Discípulo - Lc 9:23', 'Servo Fiel - Mt 25:21', 'Obreiro - 2 Tm 2:15', 'Cooperador - 1 Co 3:9', 'Aprovado - Rm 16:10', 'Homem de Fé - Hq 2:4', 'Mordomo Fiel - 1 Co 4:2', 'Coluna da Obra - Gl 2:9'];
@@ -479,28 +486,28 @@ function atualizaHist(historico_lidos) {
 
     const usuarioLogado = JSON.parse(getLogin());
     const sexo = usuarioLogado.sexo || 'Masculino';
-    if (1 <= constanciaAtual <= 6) {
+    if (1 <= constanciaAtual && constanciaAtual <= 6) {
         document.querySelector('#recordeConstancia span').innerText = `${badges[1]} Constância`;
         document.querySelector('#recordeConstancia h3').innerText = `${sexo === 'Feminino' ? titulosFem[1] : titulosMasc[1]}`;
-    } else if (7 <= constanciaAtual <= 20) {
+    } else if (7 <= constanciaAtual && constanciaAtual <= 20) {
         document.querySelector('#recordeConstancia span').innerText = `${badges[2]} Constância`;
         document.querySelector('#recordeConstancia h3').innerText = `${sexo === 'Feminino' ? titulosFem[2] : titulosMasc[2]}`;
-    } else if (21 <= constanciaAtual <= 49) {
+    } else if (21 <= constanciaAtual && constanciaAtual <= 49) {
         document.querySelector('#recordeConstancia span').innerText = `${badges[3]} Constância`;
         document.querySelector('#recordeConstancia h3').innerText = `${sexo === 'Feminino' ? titulosFem[3] : titulosMasc[3]}`;
-    } else if (50 <= constanciaAtual <= 89) {
+    } else if (50 <= constanciaAtual && constanciaAtual <= 89) {
         document.querySelector('#recordeConstancia span').innerText = `${badges[4]} Constância`;
         document.querySelector('#recordeConstancia h3').innerText = `${sexo === 'Feminino' ? titulosFem[4] : titulosMasc[4]}`;
-    } else if (90 <= constanciaAtual <= 119) {
+    } else if (90 <= constanciaAtual && constanciaAtual <= 119) {
         document.querySelector('#recordeConstancia span').innerText = `${badges[5]} Constância`;
         document.querySelector('#recordeConstancia h3').innerText = `${sexo === 'Feminino' ? titulosFem[5] : titulosMasc[5]}`;
-    } else if (120 <= constanciaAtual <= 149) {
+    } else if (120 <= constanciaAtual && constanciaAtual <= 149) {
         document.querySelector('#recordeConstancia span').innerText = `${badges[6]} Constância`;
         document.querySelector('#recordeConstancia h3').innerText = `${sexo === 'Feminino' ? titulosFem[6] : titulosMasc[6]}`;
-    } else if (150 <= constanciaAtual <= 179) {
+    } else if (150 <= constanciaAtual && constanciaAtual <= 179) {
         document.querySelector('#recordeConstancia span').innerText = `${badges[7]} Constância`;
         document.querySelector('#recordeConstancia h3').innerText = `${sexo === 'Feminino' ? titulosFem[7] : titulosMasc[7]}`;
-    } else if (180 <= constanciaAtual <= 200) {
+    } else if (180 <= constanciaAtual && constanciaAtual <= 200) {
         document.querySelector('#recordeConstancia span').innerText = `${badges[8]} Constância`;
         document.querySelector('#recordeConstancia h3').innerText = `${sexo === 'Feminino' ? titulosFem[8] : titulosMasc[8]}`;
     } else if (constanciaAtual > 200) {
@@ -509,8 +516,6 @@ function atualizaHist(historico_lidos) {
     }
 
     document.querySelector('#recordeConstancia h2').innerText = constanciaAtual;
-
-    console.log('Constância Atual:', constanciaAtual);
 }
 
 // Executa após carregar o DOM
