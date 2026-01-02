@@ -218,10 +218,11 @@ function atualizaPaineis(dados) {
 function atualizaQtdPerm(usuarioLogado) {
     if (!usuarioLogado.atualizadoEm || usuarioLogado.atualizadoEm == '-') return;
 
-    const atualizadoEm = new Date(usuarioLogado.atualizadoEm).toLocaleDateString("pt-BR", {
-        timeZone: "America/Sao_Paulo"
-    });
-    const hoje = (new Date()).getDate();
+    const atualizadoEm = new Date(usuarioLogado.atualizadoEm)
+        .toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+
+    const hoje = new Date()
+        .toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
     if (atualizadoEm != hoje) {
         const historicoLidos = usuarioLogado.historico_lidos || [];
         historicoLidos.push({
@@ -269,9 +270,9 @@ function calculaMeta(lidos) {
             a -= qtdVersiculosCap;
             capitulosLidos.push(capitulos[id]); //separa os capítulos lidos
         } else if (qtdVersiculosMeta > 0) {
-            
+
             if (qtdVersiculosMeta > (qtdVersiculosCap / 2)) {
-                
+
                 metaCap.push(capitulos[id]); //separa os capítulos da meta
             } else {
                 capNLidos.push(capitulos[id]);
@@ -294,7 +295,7 @@ function calculaMeta(lidos) {
 
 // Logout
 function logout() {
-    sessionStorage.removeItem('login');
+    localStorage.removeItem('login');
     verificarLogin();
 }
 
@@ -449,11 +450,12 @@ function atualizaHist(historico_lidos) {
         const capitulo = li.querySelector('a').innerHTML;
         for (const registro of historico_lidos) {
             if (registro.capitulos.includes(capitulo)) {
-                const data = new Date((new Date(registro.data)).setHours(0, 0, 0, 0));
+                const dateStr = new Date(registro.data).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }).split('/').map(d => parseInt(d));
+                const data = new Date(dateStr[2],dateStr[1]-1,dateStr[0]);
                 if (!datas.includes(data)) {
                     datas.push(data);
                 }
-                li.innerHTML += `<span class="data-lido">${(data.getDate()).toString().padStart(2, "0")}/${(data.getMonth()+1).toString().padStart(2, "0")}/${data.getFullYear()}</span>`;
+                li.innerHTML += `<span class="data-lido">${dateStr.join('/')}</span>`;
                 break;
             }
         }
@@ -486,7 +488,7 @@ function atualizaHist(historico_lidos) {
             }
         }
     }
-    if(document.querySelector('#metaLista li.lido')) {
+    if (document.querySelector('#metaLista li.lido')) {
         constanciaAtual++;
     }
 
