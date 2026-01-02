@@ -12,7 +12,7 @@ const db = firebase.firestore();
 
 //login
 async function login() {
-    const login = document.querySelector('#login').value;
+    const login = document.querySelector('#login').value.toLowerCase();
     const senha = document.querySelector('#senha').value;
 
 
@@ -32,7 +32,7 @@ async function login() {
         document.querySelector('#primeiroAcessoDiv').style.display = 'flex';
     } else {
         delete user['senha'];
-        sessionStorage.setItem('login', JSON.stringify(user));
+        localStorage.setItem('login', JSON.stringify(user));
         window.location.href = 'index.html';
     }
 }

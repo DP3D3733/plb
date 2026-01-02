@@ -85,7 +85,7 @@ const livrosBiblia = new Map([
 
 
 function getLogin() {
-    return sessionStorage.getItem('login');
+    return localStorage.getItem('login');
 }
 
 // Barra de progresso
@@ -218,7 +218,9 @@ function atualizaPaineis(dados) {
 function atualizaQtdPerm(usuarioLogado) {
     if (!usuarioLogado.atualizadoEm || usuarioLogado.atualizadoEm == '-') return;
 
-    const atualizadoEm = (new Date(usuarioLogado.atualizadoEm)).getDate();
+    const atualizadoEm = new Date(usuarioLogado.atualizadoEm).toLocaleDateString("pt-BR", {
+        timeZone: "America/Sao_Paulo"
+    });
     const hoje = (new Date()).getDate();
     if (atualizadoEm != hoje) {
         const historicoLidos = usuarioLogado.historico_lidos || [];
@@ -231,7 +233,7 @@ function atualizaQtdPerm(usuarioLogado) {
         usuarioLogado.qtdLidosHoje = 0;
         usuarioLogado.lidos_hoje = [];
         usuarioLogado.atualizadoEm = '-';
-        sessionStorage.setItem('login', JSON.stringify(usuarioLogado));
+        localStorage.setItem('login', JSON.stringify(usuarioLogado));
     }
     enviarLidos();
 }
@@ -261,14 +263,20 @@ function calculaMeta(lidos) {
 
     for (const id of Object.keys(capitulos)) {
         const partes = capitulos[id].split('-++-');
-        const qtd = parseInt(partes[1], 10);
+        const qtdVersiculosCap = parseInt(partes[1], 10); //
 
-        if (a >= qtd) {
-            a -= qtd;
+        if (a >= qtdVersiculosCap) {
+            a -= qtdVersiculosCap;
             capitulosLidos.push(capitulos[id]); //separa os capítulos lidos
         } else if (qtdVersiculosMeta > 0) {
-            qtdVersiculosMeta -= qtd;
-            metaCap.push(capitulos[id]); //separa os capítulos da meta
+            
+            if (qtdVersiculosMeta > (qtdVersiculosCap / 2)) {
+                
+                metaCap.push(capitulos[id]); //separa os capítulos da meta
+            } else {
+                capNLidos.push(capitulos[id]);
+            }
+            qtdVersiculosMeta -= qtdVersiculosCap;
         } else {
             capNLidos.push(capitulos[id]);
         }
@@ -413,7 +421,7 @@ function marcarLido(button) {
     usuarioLogado.qtdLidosHoje = qtdLidosHoje;
     usuarioLogado.lidos_hoje = lidos_hoje;
     usuarioLogado.atualizadoEm = new Date();
-    sessionStorage.setItem('login', JSON.stringify(usuarioLogado));
+    localStorage.setItem('login', JSON.stringify(usuarioLogado));
     enviarLidos();
     verificarLogin();
 }
@@ -441,11 +449,11 @@ function atualizaHist(historico_lidos) {
         const capitulo = li.querySelector('a').innerHTML;
         for (const registro of historico_lidos) {
             if (registro.capitulos.includes(capitulo)) {
-                const data = new Date((new Date(registro.data)).setHours(0,0,0,0));
+                const data = new Date((new Date(registro.data)).setHours(0, 0, 0, 0));
                 if (!datas.includes(data)) {
                     datas.push(data);
                 }
-                li.innerHTML += `<span class="data-lido">${data.getDate()}/${data.getMonth()}/${data.getFullYear()}</span>`;
+                li.innerHTML += `<span class="data-lido">${(data.getDate()).toString().padStart(2, "0")}/${(data.getMonth()+1).toString().padStart(2, "0")}/${data.getFullYear()}</span>`;
                 break;
             }
         }
@@ -467,7 +475,7 @@ function atualizaHist(historico_lidos) {
             if (i === 0) {
                 constanciaAtual = 1;
             } else {
-                
+
                 const diffTime = Math.abs(datas[i] - datas[i - 1]);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 if (diffDays === 1) {
@@ -477,6 +485,9 @@ function atualizaHist(historico_lidos) {
                 }
             }
         }
+    }
+    if(document.querySelector('#metaLista li.lido')) {
+        constanciaAtual++;
     }
 
 
