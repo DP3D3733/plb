@@ -452,7 +452,7 @@ function atualizaHist(historico_lidos) {
             if (registro.capitulos.includes(capitulo)) {
                 const dateStr = new Date(registro.data).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }).split('/').map(d => parseInt(d));
                 const data = new Date(dateStr[2],dateStr[1]-1,dateStr[0]);
-                if (!datas.includes(data)) {
+                if (!datas.some(d => d.getTime() === data.getTime())) {
                     datas.push(data);
                 }
                 li.innerHTML += `<span class="data-lido">${dateStr.join('/')}</span>`;
@@ -527,7 +527,7 @@ function atualizaHist(historico_lidos) {
         document.querySelector('#recordeConstancia span').innerText = `${badges[9]} Constância`;
         document.querySelector('#recordeConstancia h3').innerText = `${sexo === 'Feminino' ? titulosFem[9] : titulosMasc[9]}`;
     }
-
+console.log()
     document.querySelector('#recordeConstancia h2').innerText = constanciaAtual;
 }
 
