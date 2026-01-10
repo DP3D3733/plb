@@ -95,11 +95,17 @@ function setProgress(valor) {
 
 // Verifica login
 async function verificarLogin() {
-    const usuarioLogado = JSON.parse(getLogin());
+
+
+    let usuarioLogado = JSON.parse(getLogin());
 
     if (!usuarioLogado) {
         window.location.replace('login.html');
     } else {
+        const user = await getUser(usuarioLogado.nome.toLowerCase());
+        delete user['senha'];
+        localStorage.setItem('login', JSON.stringify(user));
+        usuarioLogado = JSON.parse(getLogin());
         atualizaQtdPerm(usuarioLogado);
         document.querySelector('#saudacaoLbl').innerText = `Olá, ${usuarioLogado.nome}!`; //nome user
 
@@ -451,7 +457,7 @@ function atualizaHist(historico_lidos) {
         for (const registro of historico_lidos) {
             if (registro.capitulos.includes(capitulo)) {
                 const dateStr = new Date(registro.data).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }).split('/').map(d => parseInt(d));
-                const data = new Date(dateStr[2],dateStr[1]-1,dateStr[0]);
+                const data = new Date(dateStr[2], dateStr[1] - 1, dateStr[0]);
                 if (!datas.some(d => d.getTime() === data.getTime())) {
                     datas.push(data);
                 }
@@ -527,8 +533,22 @@ function atualizaHist(historico_lidos) {
         document.querySelector('#recordeConstancia span').innerText = `${badges[9]} Constância`;
         document.querySelector('#recordeConstancia h3').innerText = `${sexo === 'Feminino' ? titulosFem[9] : titulosMasc[9]}`;
     }
-console.log()
+    console.log()
     document.querySelector('#recordeConstancia h2').innerText = constanciaAtual;
+}
+
+//baixa user
+async function getUser(login) {
+    const snapshot = await db
+        .collection("usuarios")
+        .doc(login)
+        .get();
+
+    if (snapshot.exists) {
+        return snapshot.data(); // retorna os dados do usuário
+    } else {
+        return null; // usuário não existe
+    }
 }
 
 // Executa após carregar o DOM
