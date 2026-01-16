@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="favicon_v2.ico" type="image/x-icon">
     <title>PLB - Home</title>
-    
+
     <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -179,6 +179,18 @@
                     </ul>
                 </details>
             </div>
+        </div>
+    </div>
+    <div id="modalLeituraFundo">
+        
+
+        <div id="ModalLeituraBloco">
+            <div id="fecharModalButton" onclick="fecharModal()">X</div>
+            <header id="cabecalhoLeitura" onkey>
+                <span id="tituloCapitulo"></span>
+            </header>
+            <div id="versos"></div>
+            <div id="buttonCopiar" onclick="copiarPassagem()">📋 Copiar</div>
         </div>
     </div>
 </body>

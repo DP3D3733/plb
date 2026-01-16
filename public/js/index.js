@@ -135,7 +135,7 @@ async function verificarLogin() {
                     capituloNome = livrosBiblia.get(capitulo.split('-++-')[0].split(' ')[0]);
                     capituloNumero = capitulo.split('-++-')[0].split(' ')[1];
                 }
-                ul += `<li qtdVersiculos=${capitulo.split('-++-')[1]}><a href="https://www.bibliaonline.com.br/nvi/${capituloNome}/${capituloNumero}">${capitulo.split('-++-')[0]}</a><span class="lidoSinal">✔</span></li>`;
+                ul += `<li qtdVersiculos=${capitulo.split('-++-')[1]}><span class=spanCapitulo onclick="baixarCapitulo('${capituloNome}','${capituloNumero}')">${capitulo.split('-++-')[0]}</span><span class="lidoSinal">✔</span></li>`;
             });
             document.querySelector('#lidosLista').innerHTML = ul;
 
@@ -152,9 +152,9 @@ async function verificarLogin() {
                 }
                 if (usuarioLogado.lidos_hoje) {
                     const marcado = usuarioLogado.lidos_hoje[usuarioLogado.lidos_hoje.length - 1]?.includes(capitulo.split('-++-')[0]) ? '<button onclick="marcarLido(this)" class="marcarLidoButton desmarcar">↺</button>' : '';
-                    ul += `<li qtdVersiculos=${capitulo.split('-++-')[1]}><a href="https://www.bibliaonline.com.br/nvi/${capituloNome}/${capituloNumero}">${capitulo.split('-++-')[0]}</a><span class="lidoSinal">✔</span> ${marcado}</li>`;
+                    ul += `<li qtdVersiculos=${capitulo.split('-++-')[1]}><span class=spanCapitulo onclick="baixarCapitulo('${capituloNome}','${capituloNumero}')">${capitulo.split('-++-')[0]}</span><span class="lidoSinal">✔</span> ${marcado}</li>`;
                 } else {
-                    ul += `<li qtdVersiculos=${capitulo.split('-++-')[1]}><a href="https://www.bibliaonline.com.br/nvi/${capituloNome}/${capituloNumero}">${capitulo.split('-++-')[0]}</a><span class="lidoSinal">✔</span></li>`;
+                    ul += `<li qtdVersiculos=${capitulo.split('-++-')[1]}><span class=spanCapitulo onclick="baixarCapitulo('${capituloNome}','${capituloNumero}')">${capitulo.split('-++-')[0]}</span><span class="lidoSinal">✔</span></li>`;
                 }
 
             });
@@ -173,9 +173,9 @@ async function verificarLogin() {
                 }
                 if (usuarioLogado.lidos_hoje) {
                     const marcado = usuarioLogado.lidos_hoje[usuarioLogado.lidos_hoje.length - 1]?.includes(capitulo.split('-++-')[0]) ? '<button onclick="marcarLido(this)" class="marcarLidoButton desmarcar">↺</button>' : '';
-                    ul += `<li qtdVersiculos=${capitulo.split('-++-')[1]}><a href="https://www.bibliaonline.com.br/nvi/${capituloNome}/${capituloNumero}">${capitulo.split('-++-')[0]}</a><span class="lidoSinal">✔</span> ${marcado}</li>`;
+                    ul += `<li qtdVersiculos=${capitulo.split('-++-')[1]}><span class=spanCapitulo onclick="baixarCapitulo('${capituloNome}','${capituloNumero}')">${capitulo.split('-++-')[0]}</span><span class="lidoSinal">✔</span> ${marcado}</li>`;
                 } else {
-                    ul += `<li qtdVersiculos=${capitulo.split('-++-')[1]}><a href="https://www.bibliaonline.com.br/nvi/${capituloNome}/${capituloNumero}">${capitulo.split('-++-')[0]}</a><span class="lidoSinal">✔</span></li>`;
+                    ul += `<li qtdVersiculos=${capitulo.split('-++-')[1]}><span class=spanCapitulo onclick="baixarCapitulo('${capituloNome}','${capituloNumero}')">${capitulo.split('-++-')[0]}</span><span class="lidoSinal">✔</span></li>`;
                 }
             });
             document.querySelector('#aLerLista').innerHTML = ul;
@@ -379,7 +379,7 @@ function separarLivroCapitulo(texto) {
 function marcarLido(button) {
     const lido = button.innerText == '✔' ? true : false; //se false é pra Desmarcar
     const qtd = parseInt(button.parentNode.getAttribute('qtdversiculos'));
-    const capitulo = button.parentNode.querySelector('a').innerText.trim();
+    const capitulo = button.parentNode.querySelector('span.spanCapitulo').innerText.trim();
     const usuarioLogado = JSON.parse(getLogin());
     const lidos_hoje = usuarioLogado.lidos_hoje || [];
     let qtdLidosHoje = usuarioLogado.qtdLidosHoje || 0;
@@ -453,7 +453,7 @@ function atualizaHist(historico_lidos) {
     const capLidos = document.querySelectorAll('#lidosLista li');
 
     capLidos.forEach((li) => {
-        const capitulo = li.querySelector('a').innerHTML;
+        const capitulo = li.querySelector('span.spanCapitulo').innerHTML;
         for (const registro of historico_lidos) {
             if (registro.capitulos.includes(capitulo)) {
                 const dateStr = new Date(registro.data).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }).split('/').map(d => parseInt(d));
@@ -550,6 +550,211 @@ async function getUser(login) {
         return null; // usuário não existe
     }
 }
+
+async function baixarCapitulo(livro, capitulo) {
+    // doc do livro
+    const livroRef = db
+        .collection("biblia")
+        .doc("nvi")
+        .collection("livros")
+        .doc(livro);
+
+    // doc do capítulo
+    const capituloRef = livroRef
+        .collection("capitulos")
+        .doc(capitulo);
+
+    // busca em paralelo 🚀
+    const [livroSnap, capituloSnap] = await Promise.all([
+        livroRef.get(),
+        capituloRef.get()
+    ]);
+    if (livroSnap.exists) {
+        const livroNome = livroSnap.data().name;
+        const versos = capituloSnap.data().versos;
+        document.getElementById('tituloCapitulo').innerText = `${livroNome} ${capitulo}`;
+        versos.forEach((verso, index) => {
+            const elemento = document.createElement('div');
+            elemento.setAttribute('class', 'verso');
+            elemento.innerHTML = `<span class=nrVerso>${index + 1}</span><span class=versiculo>${verso}</span>`;
+            document.querySelector('#versos').appendChild(elemento);
+            let cancelarClick = false;
+
+            onLongPress(elemento, () => {
+                cancelarClick = true;
+                elemento.classList.toggle('selecionado');
+                navigator.vibrate?.(30);
+                if (document.querySelector('#versos div.selecionado')) {
+                    document.querySelector('#buttonCopiar').style.display = 'inline-flex';
+                } else {
+                    document.querySelector('#buttonCopiar').style.display = 'none';
+                }
+                atualizarReferencia();
+            }, 500);
+
+            elemento.addEventListener('click', (e) => {
+                if (cancelarClick) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    cancelarClick = false; // limpa aqui, NÃO por timeout
+                    return;
+                }
+
+                const existeSelecionado = document.querySelector('#versos div.selecionado');
+
+                // clicou em algo já selecionado → desmarca
+                if (elemento.classList.contains('selecionado')) {
+                    elemento.classList.remove('selecionado');
+                    if (!document.querySelector('#versos div.selecionado')) {
+                        document.querySelector('#buttonCopiar').style.display = 'none';
+                    }
+                    atualizarReferencia();
+                    return;
+                }
+
+                // já existe algum selecionado → seleciona este também
+                if (existeSelecionado) {
+                    elemento.classList.add('selecionado');
+                    document.querySelector('#buttonCopiar').style.display = 'inline-flex';
+                } else {
+                    document.querySelector('#buttonCopiar').style.display = 'none';
+                }
+                atualizarReferencia();
+            });
+
+        })
+        document.getElementById('modalLeituraFundo').style.display = 'flex';
+        document.body.classList.add('modal-open');
+    } else {
+        return null; // usuário não existe
+    }
+}
+
+function fecharModal() {
+    document.getElementById('modalLeituraFundo').style.display = 'none';
+    document.body.classList.remove('modal-open');
+}
+
+function onLongPress(element, callback, delay = 600, moveTolerance = 10) {
+    let timer = null;
+    let startX = 0;
+    let startY = 0;
+    let moved = false;
+
+    const start = (e) => {
+        moved = false;
+
+        if (e.touches) {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        } else {
+            startX = e.clientX;
+            startY = e.clientY;
+        }
+
+        timer = setTimeout(() => {
+            if (!moved) {
+                callback(e);
+            }
+        }, delay);
+    };
+
+    const move = (e) => {
+        if (!timer) return;
+
+        let x, y;
+        if (e.touches) {
+            x = e.touches[0].clientX;
+            y = e.touches[0].clientY;
+        } else {
+            x = e.clientX;
+            y = e.clientY;
+        }
+
+        if (Math.abs(x - startX) > moveTolerance || Math.abs(y - startY) > moveTolerance) {
+            moved = true;
+            clearTimeout(timer);
+            timer = null;
+        }
+    };
+
+    const cancel = () => {
+        if (timer) {
+            clearTimeout(timer);
+            timer = null;
+        }
+    };
+
+    element.addEventListener("mousedown", start);
+    element.addEventListener("touchstart", start, { passive: true });
+
+    element.addEventListener("mousemove", move);
+    element.addEventListener("touchmove", move, { passive: true });
+
+    element.addEventListener("mouseup", cancel);
+    element.addEventListener("mouseleave", cancel);
+    element.addEventListener("touchend", cancel);
+    element.addEventListener("touchcancel", cancel);
+}
+
+function copiarPassagem() {
+    const versiculos = Array.from(document.querySelectorAll('div.selecionado')).map(versiculo => `${toSuperscript(versiculo.querySelector('span.nrVerso').innerText)} ${versiculo.querySelector('span.versiculo').innerText}`).join('\n');
+    const referencia = document.querySelector('#buttonCopiar').innerText.split('(')[1].split(')')[0];
+
+    navigator.clipboard.writeText(referencia+'\n'+versiculos);
+}
+
+const superscripts = {
+    '0': '⁰',
+    '1': '¹',
+    '2': '²',
+    '3': '³',
+    '4': '⁴',
+    '5': '⁵',
+    '6': '⁶',
+    '7': '⁷',
+    '8': '⁸',
+    '9': '⁹'
+};
+
+function toSuperscript(num) {
+    return String(num)
+        .split('')
+        .map(n => superscripts[n] ?? n)
+        .join('');
+}
+
+function atualizarReferencia() {
+    const button = document.getElementById('buttonCopiar');
+    const capitulo = document.getElementById('tituloCapitulo').innerText;
+    const versiculos = Array.from(document.querySelectorAll('div.selecionado span.nrVerso')).map(versiculo => parseInt(versiculo.innerText));
+    // garante números únicos e ordenados
+    const versos = [...new Set(versiculos)]
+        .map(Number)
+        .sort((a, b) => a - b);
+
+    let partes = [];
+    let inicio = versos[0];
+    let anterior = versos[0];
+
+    for (let i = 1; i <= versos.length; i++) {
+        const atual = versos[i];
+
+        // quebra a sequência
+        if (atual !== anterior + 1) {
+            if (inicio === anterior) {
+                partes.push(`${inicio}`);
+            } else {
+                partes.push(`${inicio}-${anterior}`);
+            }
+            inicio = atual;
+        }
+        anterior = atual;
+    }
+
+    button.innerText = `📋 Copiar (${capitulo}:${partes.join(',')})`;
+}
+
 
 // Executa após carregar o DOM
 document.addEventListener('DOMContentLoaded', verificarLogin);

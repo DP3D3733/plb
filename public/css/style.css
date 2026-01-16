@@ -312,3 +312,152 @@ a {
 .lido a {
     color: white;
 }
+
+#modalLeituraFundo {
+    display: none;
+    position: fixed;
+    background-color: #000000c4;
+    z-index: 1;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    justify-content: center;
+}
+
+#ModalLeituraBloco {
+    background-color: rgb(255, 255, 255);
+    border-radius: 5px;
+    padding: 15px;
+    margin: 30px;
+    border-color: rgba(0, 0, 0, 0.116);
+    width: 100%;
+    height: 100vd;
+    display: flex;
+    flex-direction: column;
+    font-family: "Georgia", "Times New Roman", serif;
+    inset: 0;
+    max-width: 700px;
+    position: relative;
+}
+
+body.modal-open {
+    overflow: hidden;
+    height: 100vh;
+}
+
+#fecharModalButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+
+    background-color: rgb(226, 169, 169);
+    border-radius: 50px;
+    padding: 5px 8px;
+    color: #ffffff;
+
+    cursor: pointer;
+    z-index: 10;
+}
+
+#buttonCopiar {
+    -webkit-tap-highlight-color: transparent;
+    background-color: #2fb165;
+    color: #ffffff;
+
+    padding: 10px 16px;
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+
+    width: fit-content;
+    cursor: pointer;
+    user-select: none;
+
+    display: none;
+    align-items: center;
+    gap: 6px;
+
+    margin-left: 50%;
+    transform: translateX(-50%);
+
+    box-shadow: 0 4px 10px rgba(47, 177, 101, 0.35);
+    transition: 
+        background-color 0.2s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+#buttonCopiar:hover {
+    background-color: #28a35c;
+    box-shadow: 0 6px 14px rgba(47, 177, 101, 0.45);
+}
+
+#buttonCopiar:active {
+    transform: translateX(-50%) scale(0.78);
+    box-shadow: 0 3px 6px rgba(47, 177, 101, 0.35);
+}
+
+
+
+/* Cabeçalho */
+#cabecalhoLeitura {
+    padding: 16px;
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: bold;
+    background: #ffffff;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Área de leitura */
+#versos {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px 40px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Cada verso */
+.verso {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    line-height: 1.6;
+}
+
+.verso.selecionado{
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+/* Número do verso */
+.nrVerso {
+    font-size: 0.75rem;
+    color: #888;
+    min-width: 20px;
+    text-align: right;
+    user-select: none;
+}
+
+/* Texto do versículo */
+.versiculo {
+    font-size: 1.05rem;
+    color: #222;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    #versos {
+        padding: 16px 14px 32px;
+    }
+
+    .versiculo {
+        font-size: 1rem;
+    }
+}
