@@ -573,6 +573,7 @@ async function baixarCapitulo(livro, capitulo) {
         const livroNome = livroSnap.data().name;
         const versos = capituloSnap.data().versos;
         document.getElementById('tituloCapitulo').innerText = `${livroNome} ${capitulo}`;
+        document.querySelector('#versos').innerHTML = '';
         versos.forEach((verso, index) => {
             const elemento = document.createElement('div');
             elemento.setAttribute('class', 'verso');
@@ -702,6 +703,14 @@ function copiarPassagem() {
     const referencia = document.querySelector('#buttonCopiar').innerText.split('(')[1].split(')')[0];
 
     navigator.clipboard.writeText(referencia+'\n'+versiculos);
+    document.querySelectorAll('div.selecionado').forEach(item => {
+        item.classList.remove('selecionado');
+    });
+    document.querySelector('#buttonCopiar').innerText = '📋 Copiado!';
+    setTimeout(() => {
+        document.querySelector('#buttonCopiar').style.display = 'none';
+        document.querySelector('#buttonCopiar').innerText = '📋 Copiar';
+    }, 1000);
 }
 
 const superscripts = {
