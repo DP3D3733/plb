@@ -362,15 +362,22 @@ body.modal-open {
     z-index: 10;
 }
 
-#buttonCopiar {
+#modalFooter{
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.footerButt {
     -webkit-tap-highlight-color: transparent;
     background-color: #2fb165;
     color: #ffffff;
 
-    padding: 10px 16px;
+    padding: 5px 8px;
     border-radius: 8px;
 
-    font-size: 14px;
+    font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.3px;
 
@@ -378,28 +385,20 @@ body.modal-open {
     cursor: pointer;
     user-select: none;
 
-    display: none;
-    align-items: center;
-    gap: 6px;
-
-    margin-left: 50%;
-    transform: translateX(-50%);
-
     box-shadow: 0 4px 10px rgba(47, 177, 101, 0.35);
-    transition: 
-        background-color 0.2s ease,
-        transform 0.15s ease,
-        box-shadow 0.15s ease;
 }
 
-#buttonCopiar:hover {
+#buttonCopiar {
+    display: none;
+}
+
+#atualizarButton {
+    display: none;
+}
+
+.footerButt:hover {
     background-color: #28a35c;
     box-shadow: 0 6px 14px rgba(47, 177, 101, 0.45);
-}
-
-#buttonCopiar:active {
-    transform: translateX(-50%) scale(0.78);
-    box-shadow: 0 3px 6px rgba(47, 177, 101, 0.35);
 }
 
 
@@ -431,7 +430,7 @@ body.modal-open {
     line-height: 1.6;
 }
 
-.verso.selecionado{
+.verso.selecionado {
     text-decoration: underline;
     font-weight: bold;
 }

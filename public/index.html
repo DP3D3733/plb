@@ -21,6 +21,7 @@
     <div>
         <div class="linhaProgresso">
             <h1 id="saudacaoLbl">Olá Fulano</h1>
+            <button class="footerButt" id="atualizarButton" onclick="atualizarApp()">Nova versão disponível! Atualizar!</button>
             <button id="sairButton" onclick="logout()">Sair</button>
         </div>
         <h3>Seu progresso de leitura bíblica</h3>
@@ -190,7 +191,12 @@
                 <span id="tituloCapitulo"></span>
             </header>
             <div id="versos"></div>
-            <div id="buttonCopiar" onclick="copiarPassagem()">📋 Copiar</div>
+            <div id="modalFooter">
+                <button class="footerButt" id="antCap" onclick="avancarRetrocederCap('anterior')">← Anterior</button>
+                <button class="footerButt" id="buttonCopiar" onclick="copiarPassagem()">📋 Copiar</button>
+                <button class="footerButt" id="proxCap" onclick="avancarRetrocederCap('proximo')">Próximo →</button>
+            </div>
+            
         </div>
     </div>
 </body>

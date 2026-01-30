@@ -99,9 +99,11 @@ async function verificarLogin() {
 
     let usuarioLogado = JSON.parse(getLogin());
 
+
     if (!usuarioLogado) {
         window.location.replace('login.html');
     } else {
+
         const user = await getUser(usuarioLogado.nome.toLowerCase());
         delete user['senha'];
         localStorage.setItem('login', JSON.stringify(user));
@@ -203,6 +205,7 @@ async function verificarLogin() {
             }
             atualizaPaineis(dados);
         }
+        verificarAtualizacoes();
     }
 }
 
@@ -623,9 +626,30 @@ async function baixarCapitulo(livro, capitulo) {
                 atualizarReferencia();
             });
 
-        })
+        });
         document.getElementById('modalLeituraFundo').style.display = 'flex';
+        document.querySelector("#versos").scroll(0, 0);
         document.body.classList.add('modal-open');
+
+        const container = document.getElementById('versos');
+        const sentinela = document.querySelector('#versos div.verso:last-child');
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    const cap = Array.from(document.querySelectorAll('span.spanCapitulo')).find(cap => cap.innerText == document.querySelector('#tituloCapitulo').innerText);
+                    if (cap && cap.parentNode.querySelector('button.marcarLidoButton') && cap.parentNode.querySelector('button.marcarLidoButton').innerText == '✔') {
+                        cap.parentNode.querySelector('button.marcarLidoButton').click();
+                    }
+                }
+            },
+            {
+                root: container,   // scroll interno
+                threshold: 1.0     // 100% visível
+            }
+        );
+
+        observer.observe(sentinela);
     } else {
         return null; // usuário não existe
     }
@@ -702,7 +726,7 @@ function copiarPassagem() {
     const versiculos = Array.from(document.querySelectorAll('div.selecionado')).map(versiculo => `${toSuperscript(versiculo.querySelector('span.nrVerso').innerText)} ${versiculo.querySelector('span.versiculo').innerText}`).join('\n');
     const referencia = document.querySelector('#buttonCopiar').innerText.split('(')[1].split(')')[0];
 
-    navigator.clipboard.writeText(referencia+'\n'+versiculos);
+    navigator.clipboard.writeText(referencia + '\n' + versiculos);
     document.querySelectorAll('div.selecionado').forEach(item => {
         item.classList.remove('selecionado');
     });
@@ -764,8 +788,49 @@ function atualizarReferencia() {
     button.innerText = `📋 Copiar (${capitulo}:${partes.join(',')})`;
 }
 
+//dentro do modal, troca o capítulo sendo exibido
+function avancarRetrocederCap(prox_ant) {
+    const ordem = JSON.parse(sessionStorage.getItem('ordem')).ordem;
+    const capitulo = document.querySelector('#tituloCapitulo').innerText;
+    const id = parseInt(Object.keys(ordem).find(key => ordem[key].includes(capitulo)));
+    if (!id) return;
+
+    const prox_antId = prox_ant == 'anterior' ? id - 1 : id + 1;
+
+    if (prox_antId <= 0) {
+        baixarCapitulo('gn', '1');
+    } else if (prox_antId > 1189) {
+        baixarCapitulo('ap', '22');
+    } else {
+        Array.from(document.querySelectorAll('span.spanCapitulo')).find(cap => cap.innerText == ordem[prox_antId].split('-++-')[0]).click();
+    }
+}
+
+async function verificarAtualizacoes() {
+    const nrVersionBaixada = localStorage.getItem('version') || 0;
+    const atualizarButt = document.getElementById('atualizarButton');
+    db.collection("version").doc("version").onSnapshot((snapshot) => {
+        if (snapshot.exists && snapshot.data().version != nrVersionBaixada) {
+            atualizarButt.setAttribute('version', snapshot.data().version);
+            atualizarButt.style.display = 'flex';
+        } else {
+            atualizarButt.style.display = 'none';
+        }
+    });
+}
+
+function atualizarApp() {
+    const newVersion = document.getElementById('atualizarButton').getAttribute('version');
+    localStorage.setItem('version', newVersion);
+    window.location.reload();
+}
+
+
+
 
 // Executa após carregar o DOM
-document.addEventListener('DOMContentLoaded', verificarLogin);
+document.addEventListener('DOMContentLoaded', function () {
+    verificarLogin();
+});
 
 
