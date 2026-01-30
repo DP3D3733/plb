@@ -810,8 +810,8 @@ async function verificarAtualizacoes() {
     const nrVersionBaixada = localStorage.getItem('version') || 0;
     const atualizarButt = document.getElementById('atualizarButton');
     db.collection("version").doc("version").onSnapshot((snapshot) => {
-        if (snapshot.exists && snapshot.data().version != nrVersionBaixada) {
-            atualizarButt.setAttribute('version', snapshot.data().version);
+        if (snapshot.exists && snapshot.data().commit != nrVersionBaixada) {
+            atualizarButt.setAttribute('version', snapshot.data().commit);
             atualizarButt.style.display = 'flex';
         } else {
             atualizarButt.style.display = 'none';
